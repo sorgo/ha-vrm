@@ -1,0 +1,11 @@
+{
+  "codeowners": ["@sorgo"],
+  "config_flow": false,
+  "dependencies": [],
+  "documentation": "https://github.com/sorgo/ha-vrm/",
+  "domain": "ha-vrm",
+  "iot_class": "calculated",
+  "name": "HA VRM integration",
+  "requirements": [],
+  "version": "0.0.1"
+}
