@@ -26,6 +26,8 @@ REPO_SCHEMA = vol.Schema(
     }
 )
 
+VERSION = 0
+MINOR_VERSION = 1
 
 def validate_path(path: str) -> None:
     """Validates a VRM installation

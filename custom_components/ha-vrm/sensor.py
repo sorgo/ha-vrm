@@ -95,7 +95,7 @@ async def async_setup_platform(
     """Set up the sensor platform."""
     session = async_get_clientsession(hass)
     github = GitHubAPI(session, "requester", oauth_token=config[CONF_ACCESS_TOKEN])
-    sensors = [GitHubRepoSensor(github, repo) for repo in config[CONF_REPOS]]
+    sensors = [VRMSensor(github, repo) for repo in config[CONF_REPOS]]
     async_add_entities(sensors, update_before_add=True)
 
 
