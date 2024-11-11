@@ -10,8 +10,6 @@ from homeassistant.const import CONF_ACCESS_TOKEN, CONF_NAME, CONF_PATH, CONF_UR
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
-from gidgethub import BadRequest
-from gidgethub.aiohttp import GitHubAPI
 
 from .const import CONF_REPOS, DOMAIN
 
