@@ -9,5 +9,5 @@
   "issues_tracker": "https://github.com/sorgo/ha-vrm/issues",
   "name": "HA VRM integration",
   "requirements": [],
-  "version": "0.0.1"
+  "version": "0.0.2"
 }
