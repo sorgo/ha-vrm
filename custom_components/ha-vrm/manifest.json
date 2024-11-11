@@ -7,7 +7,7 @@
   "integration_type": "hub",
   "iot_class": "calculated",
   "issues_tracker": "https://github.com/sorgo/ha-vrm/issues",
-  "name": "HA VRM integration",
+  "name": "HA VRM integration by Sorgo",
   "requirements": [],
   "version": "0.0.2"
 }
