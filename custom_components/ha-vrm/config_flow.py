@@ -11,7 +11,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 
-from .const import CONF_REPOS, DOMAIN
+from .const import CONF_SITES, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -65,15 +65,15 @@ class VRMHaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             if not errors:
                 # Input is valid, set data.
                 self.data = user_input
-                self.data[CONF_REPOS] = []
+                self.data[CONF_SITES] = []
                 # Return the form of the next step.
-                return await self.async_step_repo()
+                return await self.async_step_site()
 
         return self.async_show_form(
             step_id="user", data_schema=AUTH_SCHEMA, errors=errors
         )
 
-    async def async_step_repo(self, user_input: Optional[Dict[str, Any]] = None):
+    async def async_step_site(self, user_input: Optional[Dict[str, Any]] = None):
         """Second step in config flow to add a repo to watch."""
         errors: Dict[str, str] = {}
         if user_input is not None:
@@ -85,7 +85,7 @@ class VRMHaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             if not errors:
                 # Input is valid, set data.
-                self.data[CONF_REPOS].append(
+                self.data[CONF_SITES].append(
                     {
                         "path": user_input[CONF_PATH],
                         "name": user_input.get(CONF_NAME, user_input[CONF_PATH]),
@@ -94,7 +94,7 @@ class VRMHaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 # If user ticked the box show this form again so they can add an
                 # additional repo.
                 if user_input.get("add_another", False):
-                    return await self.async_step_repo()
+                    return await self.async_step_site()
 
                 # User is done adding repos, create the config entry.
                 return self.async_create_entry(title="GitHub Custom", data=self.data)
