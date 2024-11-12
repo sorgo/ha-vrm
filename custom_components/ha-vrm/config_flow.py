@@ -6,7 +6,7 @@ import json
 from datetime import datetime
 
 from homeassistant import config_entries, core
-from homeassistant.const import CONF_ACCESS_TOKEN, CONF_NAME, CONF_PATH, CONF_URL
+from homeassistant.const import CONF_ACCESS_TOKEN, CONF_NAME, CONF_PATH, CONF_URL, CONF_USERNAME, CONF_PASSWORD
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
@@ -16,7 +16,7 @@ from .const import CONF_SITES, DOMAIN
 _LOGGER = logging.getLogger(__name__)
 
 AUTH_SCHEMA = vol.Schema(
-    {vol.Required(CONF_ACCESS_TOKEN): cv.string, vol.Optional(CONF_URL): cv.string}
+    {vol.Required(CONF_USERNAME): cv.string, vol.Required(CONF_PASSWORD): cv.string, vol.Optional(CONF_URL): cv.string}
 )
 REPO_SCHEMA = vol.Schema(
     {
@@ -50,7 +50,7 @@ async def validate_auth(access_token: str, hass: core.HomeAssistant) -> None:
 
 
 class VRMHaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Github Custom config flow."""
+    """VRM HA Custom config flow."""
 
     data: Optional[Dict[str, Any]]
 
