@@ -4,9 +4,13 @@ from typing import Any, Dict, Optional
 import requests
 import json
 from datetime import datetime
+import async_timeout
+import asyncio
+import aiohttp
+import sys
 
 from homeassistant import config_entries, core
-from homeassistant.const import CONF_ACCESS_TOKEN, CONF_NAME, CONF_PATH, CONF_URL, CONF_USERNAME, CONF_PASSWORD
+from homeassistant.const import CONF_ACCESS_TOKEN, CONF_NAME, CONF_PATH, CONF_URL, CONF_USERNAME, CONF_PASSWORD, PATH_LOGIN, REQUEST_TIMEOUT
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
@@ -37,12 +41,38 @@ def validate_path(path: str) -> None:
         raise ValueError
 
 
-async def validate_auth(access_token: str, hass: core.HomeAssistant) -> None:
+async def validate_cred(user_name: str, password: str, hass: core.HomeAssistant) -> None:
     """Validates a VRM access token.
     Raises a ValueError if the auth token is invalid.
     """
-    session = async_get_clientsession(hass)
-    gh = GitHubAPI(session, "requester", oauth_token=access_token)
+    """async_setup_platform."""
+    _LOGGER.debug("[" + sys._getframe().f_code.co_name + "]--> %s", self.name)
+
+    try:
+        websession = async_get_clientsession(self.hass)
+        with async_timeout.timeout(REQUEST_TIMEOUT):
+            resp = await websession.get(PATH_LOGIN)
+            # resp = await websession.get(PATH_LOGIN.format(stopId=self._stopid, minutesAfter=self._minsafter))
+        if resp.status != 200:
+            _LOGGER.error(f"{resp.url} returned {resp.status}")
+            return
+
+        json_response = await resp.json()
+        _LOGGER.debug("async_update: %s", req.text.encode("utf-8"))
+        #
+        _LOGGER.debug(json_response)
+
+    except (asyncio.TimeoutError) as err:
+        _LOGGER.error("[" + sys._getframe().f_code.co_name + "] TimeoutError %s", err)
+    except (aiohttp.ClientError) as err:
+        _LOGGER.error("[" + sys._getframe().f_code.co_name + "] aiohttp.ClientError %s", err)
+    except ValueError:
+        _LOGGER.error("[" + sys._getframe().f_code.co_name + "] Received non-JSON data from API endpoint")
+    except vol.Invalid as err:
+        _LOGGER.error("[" + sys._getframe().f_code.co_name + "] Received unexpected JSON from " " API endpoint: %s", err)
+    except Exception as e:
+        _LOGGER.error("[" + sys._getframe().f_code.co_name + "] Exception: " + str(e))
+    #raise myRequestError
     try:
         await gh.getitem("repos/home-assistant/core")
     except BadRequest:
@@ -59,7 +89,7 @@ class VRMHaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors: Dict[str, str] = {}
         if user_input is not None:
             try:
-                await validate_auth(user_input[CONF_ACCESS_TOKEN], self.hass)
+                await validate_cred(user_input[CONF_USERNAME], user_input[CONF_PASSWORD], self.hass)
             except ValueError:
                 errors["base"] = "auth"
             if not errors:

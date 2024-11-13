@@ -28,3 +28,5 @@ PATH_SITES = "/v2/users/{userId}/navbar-sites?extended=1"
 BASE_API_URL = "https://vrmapi.victronenergy.com/"
 
 CONF_SITES = "installations"
+
+REQUEST_TIMEOUT = 30
