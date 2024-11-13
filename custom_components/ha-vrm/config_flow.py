@@ -45,11 +45,9 @@ async def validate_cred(user_name: str, password: str, hass: core.HomeAssistant)
     """Validates a VRM access token.
     Raises a ValueError if the auth token is invalid.
     """
-    """async_setup_platform."""
-    _LOGGER.debug("[" + sys._getframe().f_code.co_name + "]--> %s", self.name)
 
     try:
-        websession = async_get_clientsession(self.hass)
+        websession = async_get_clientsession(hass)
         with async_timeout.timeout(REQUEST_TIMEOUT):
             resp = await websession.get(PATH_LOGIN)
             # resp = await websession.get(PATH_LOGIN.format(stopId=self._stopid, minutesAfter=self._minsafter))
@@ -58,7 +56,7 @@ async def validate_cred(user_name: str, password: str, hass: core.HomeAssistant)
             return
 
         json_response = await resp.json()
-        _LOGGER.debug("async_update: %s", req.text.encode("utf-8"))
+        _LOGGER.debug("async_update: %s", resp.text.encode("utf-8"))
         #
         _LOGGER.debug(json_response)
 
