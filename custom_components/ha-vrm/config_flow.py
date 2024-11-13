@@ -71,10 +71,11 @@ async def validate_cred(user_name: str, password: str, hass: core.HomeAssistant)
     except Exception as e:
         _LOGGER.error("[" + sys._getframe().f_code.co_name + "] Exception: " + str(e))
     #raise myRequestError
-    try:
-        await gh.getitem("repos/home-assistant/core")
-    except BadRequest:
-        raise ValueError
+    raise ValueError
+#    try:
+#        await gh.getitem("repos/home-assistant/core")
+#    except BadRequest:
+#        raise ValueError
 
 
 class VRMHaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
