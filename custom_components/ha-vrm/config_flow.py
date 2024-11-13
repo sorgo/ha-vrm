@@ -10,12 +10,12 @@ import aiohttp
 import sys
 
 from homeassistant import config_entries, core
-from homeassistant.const import CONF_ACCESS_TOKEN, CONF_NAME, CONF_PATH, CONF_URL, CONF_USERNAME, CONF_PASSWORD, PATH_LOGIN, REQUEST_TIMEOUT
+from homeassistant.const import CONF_ACCESS_TOKEN, CONF_NAME, CONF_PATH, CONF_URL, CONF_USERNAME, CONF_PASSWORD
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 
-from .const import CONF_SITES, DOMAIN
+from .const import CONF_SITES, DOMAIN, PATH_LOGIN, REQUEST_TIMEOUT
 
 _LOGGER = logging.getLogger(__name__)
 
