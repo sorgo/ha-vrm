@@ -67,13 +67,13 @@ class VRMHaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 self.data = user_input
                 self.data[CONF_SITES] = []
                 # Return the form of the next step.
-                return await self.async_step_site()
+                return await self.async_step_sites()
 
         return self.async_show_form(
             step_id="user", data_schema=AUTH_SCHEMA, errors=errors
         )
 
-    async def async_step_site(self, user_input: Optional[Dict[str, Any]] = None):
+    async def async_step_sites(self, user_input: Optional[Dict[str, Any]] = None):
         """Second step in config flow to add a repo to watch."""
         errors: Dict[str, str] = {}
         if user_input is not None:
@@ -97,7 +97,7 @@ class VRMHaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     return await self.async_step_site()
 
                 # User is done adding repos, create the config entry.
-                return self.async_create_entry(title="GitHub Custom", data=self.data)
+                return self.async_create_entry(title="vrm-ha", data=self.data)
 
         return self.async_show_form(
             step_id="repo", data_schema=REPO_SCHEMA, errors=errors
