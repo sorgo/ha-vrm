@@ -15,7 +15,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 
-from .const import CONF_SITES, DOMAIN, PATH_LOGIN, REQUEST_TIMEOUT
+from .const import CONF_SITES, DOMAIN, PATH_LOGIN, REQUEST_TIMEOUT, BASE_API_URL
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -49,7 +49,11 @@ async def validate_cred(user_name: str, password: str, hass: core.HomeAssistant)
     try:
         websession = async_get_clientsession(hass)
         with async_timeout.timeout(REQUEST_TIMEOUT):
-            resp = await websession.get(PATH_LOGIN)
+            cred_data = {
+                "username": user_name,
+                "password": password
+            }
+            resp = await websession.post(BASE_API_URL + PATH_LOGIN, data=cred_data)
             # resp = await websession.get(PATH_LOGIN.format(stopId=self._stopid, minutesAfter=self._minsafter))
         if resp.status != 200:
             _LOGGER.error(f"{resp.url} returned {resp.status}")
@@ -58,7 +62,8 @@ async def validate_cred(user_name: str, password: str, hass: core.HomeAssistant)
         json_response = await resp.json()
         _LOGGER.debug("async_update: %s", resp.text.encode("utf-8"))
         #
-        _LOGGER.debug(json_response)
+        _LOGGER.warn(json_response)
+        return json_response["token"]
 
     except (asyncio.TimeoutError) as err:
         _LOGGER.error("[" + sys._getframe().f_code.co_name + "] TimeoutError %s", err)
@@ -88,7 +93,7 @@ class VRMHaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors: Dict[str, str] = {}
         if user_input is not None:
             try:
-                await validate_cred(user_input[CONF_USERNAME], user_input[CONF_PASSWORD], self.hass)
+                self.data[CONF_ACCESS_TOKEN] = await validate_cred(user_input[CONF_USERNAME], user_input[CONF_PASSWORD], self.hass)
             except ValueError:
                 errors["base"] = "auth"
             if not errors:
@@ -129,5 +134,5 @@ class VRMHaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 return self.async_create_entry(title="vrm-ha", data=self.data)
 
         return self.async_show_form(
-            step_id="repo", data_schema=REPO_SCHEMA, errors=errors
+            step_id="sites", data_schema=REPO_SCHEMA, errors=errors
         )
