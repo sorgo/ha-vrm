@@ -41,7 +41,7 @@ def validate_path(path: str) -> None:
         raise ValueError
 
 
-async def validate_cred(user_name: str, password: str, hass: core.HomeAssistant) -> None:
+async def validate_cred(user_name: str, password: str, hass: core.HomeAssistant) -> str:
     """Validates a VRM access token.
     Raises a ValueError if the auth token is invalid.
     """
@@ -53,16 +53,23 @@ async def validate_cred(user_name: str, password: str, hass: core.HomeAssistant)
                 "username": user_name,
                 "password": password
             }
-            resp = await websession.post(BASE_API_URL + PATH_LOGIN, data=json.dumps(cred_data))
+
+
+            resp = await websession.request(
+                "POST", BASE_API_URL + PATH_LOGIN, data=json.dumps(cred_data, ensure_ascii = False)
+            )
+#            resp = await websession.post(BASE_API_URL + PATH_LOGIN, data=json.dumps(cred_data, ensure_ascii = False))
+            #resp = await websession.post(BASE_API_URL + PATH_LOGIN, data=cred_data)
             # resp = await websession.get(PATH_LOGIN.format(stopId=self._stopid, minutesAfter=self._minsafter))
+            #return resp.json()
         if resp.status != 200:
             _LOGGER.error(f"{resp.url} returned {resp.status}")
             return
 
         json_response = await resp.json()
-        _LOGGER.debug("async_update: %s", resp.text.encode("utf-8"))
-        #
-        _LOGGER.warn(json_response)
+#        _LOGGER.debug("async_update: %s", resp.text.encode("utf-8"))
+#        #
+#        _LOGGER.debug(json_response)
         return json_response["token"]
 
     except (asyncio.TimeoutError) as err:
@@ -87,10 +94,12 @@ class VRMHaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """VRM HA Custom config flow."""
 
     data: Optional[Dict[str, Any]]
+    sites: Optional[Dict[str, Any]]
 
     async def async_step_user(self, user_input: Optional[Dict[str, Any]] = None):
         """Invoked when a user initiates a flow via the user interface."""
         errors: Dict[str, str] = {}
+        self.data = {}
         if user_input is not None:
             try:
                 self.data[CONF_ACCESS_TOKEN] = await validate_cred(user_input[CONF_USERNAME], user_input[CONF_PASSWORD], self.hass)
@@ -98,7 +107,8 @@ class VRMHaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors["base"] = "auth"
             if not errors:
                 # Input is valid, set data.
-                self.data = user_input
+                self.data[CONF_USERNAME] = user_input[CONF_USERNAME]
+                self.data[CONF_PASSWORD] = user_input[CONF_PASSWORD]
                 self.data[CONF_SITES] = []
                 # Return the form of the next step.
                 return await self.async_step_sites()
@@ -132,7 +142,13 @@ class VRMHaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
                 # User is done adding repos, create the config entry.
                 return self.async_create_entry(title="vrm-ha", data=self.data)
+        DISCOVERED_SCHEMA = {}
+        DISCOVERED_SCHEMA[vol.Required("aaa")] = cv.boolean
+        DISCOVERED_SCHEMA[vol.Required("bbb")] = cv.boolean
+        DISCOVERED_SCHEMA[vol.Optional("add_another")] = cv.boolean
+        DISCOVERED = vol.Schema(DISCOVERED_SCHEMA)
+
 
         return self.async_show_form(
-            step_id="sites", data_schema=REPO_SCHEMA, errors=errors
+            step_id="sites", data_schema=DISCOVERED, errors=errors
         )
