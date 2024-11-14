@@ -53,7 +53,7 @@ async def validate_cred(user_name: str, password: str, hass: core.HomeAssistant)
                 "username": user_name,
                 "password": password
             }
-            resp = await websession.post(BASE_API_URL + PATH_LOGIN, data=cred_data)
+            resp = await websession.post(BASE_API_URL + PATH_LOGIN, json_data=cred_data)
             # resp = await websession.get(PATH_LOGIN.format(stopId=self._stopid, minutesAfter=self._minsafter))
         if resp.status != 200:
             _LOGGER.error(f"{resp.url} returned {resp.status}")
